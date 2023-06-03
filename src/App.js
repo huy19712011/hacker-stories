@@ -1,26 +1,26 @@
 import logo from './logo.svg';
 import './App.css';
 
-const list = [
-    {
-        title: 'React',
-        url: 'https://reactjs.org',
-        author: 'Jordan Walke',
-        num_comments: 3,
-        points: 4,
-        objectId: 0,
-    },
-    {
-        title: 'Redux',
-        url: 'https://redux.js.org',
-        author: 'Dan Abramov, Andrew Clark',
-        num_comments: 2,
-        points: 5,
-        objectId: 1,
-    },
-];
-
 const App = () => {
+
+    const stories = [
+        {
+            title: 'React',
+            url: 'https://reactjs.org',
+            author: 'Jordan Walke',
+            num_comments: 3,
+            points: 4,
+            objectId: 0,
+        },
+        {
+            title: 'Redux',
+            url: 'https://redux.js.org',
+            author: 'Dan Abramov, Andrew Clark',
+            num_comments: 2,
+            points: 5,
+            objectId: 1,
+        },
+    ];
 
     // do something here
     const handleChange = event => {
@@ -37,16 +37,14 @@ const App = () => {
             <input id="search" type="text" onChange={handleChange}/>
             <hr/>
 
-            <List/>
-
-
+            <List list={stories}/>
         </div>
     );
 };
 
 
-const List = () =>
-    list.map(item => (
+const List = props =>
+    props.list.map(item => (
         <div key={item.objectId}>
             <span>
                 <a href={item.url}>{item.title}</a>
