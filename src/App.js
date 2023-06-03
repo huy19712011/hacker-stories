@@ -78,7 +78,7 @@ const Search = ({search, onSearch}) => {
 };
 
 const List = ({list}) =>
-    list.map(item => <Item key={item.objectId} {...item}/>);
+    list.map(({objectId, ...item}) => <Item key={objectId} {...item}/>);
 
 // Using nested destructuring
 const Item = ({title, url, author, num_comments, points}) => (
