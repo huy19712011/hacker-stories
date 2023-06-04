@@ -1,6 +1,5 @@
 import React from "react";
 
-import logo from './logo.svg';
 import './App.css';
 
 const App = () => {
@@ -9,7 +8,7 @@ const App = () => {
         {
             title: 'React',
             url: 'https://reactjs.org',
-            author: 'Jordan Walke',
+            author: 'Jordan Walk',
             num_comments: 3,
             points: 4,
             objectId: 0,
@@ -92,17 +91,6 @@ const InputWithLabel = ({id, value, type='text', onInputChange, isFocused, child
         </>
     );
 };
-const Search = ({search, onSearch}) => {
-
-    return (
-        <>
-            <label htmlFor="search">Search</label>
-            <input id="search" type="text" value={search} onChange={onSearch}/>
-        </>
-    );
-
-};
-
 const List = ({list}) =>
     list.map(({objectId, ...item}) => <Item key={objectId} {...item}/>);
 
