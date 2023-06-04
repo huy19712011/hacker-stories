@@ -24,12 +24,18 @@ const App = () => {
         },
     ];
 
-    const [searchTerm, setSearchTerm] =
-        React.useState(localStorage.getItem('search') || 'React');
+    // custom hook
+    const useSemiPersistentState = (key, initialState) => {
+        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
 
-    React.useEffect(() => {
-        localStorage.setItem('search', searchTerm);
-    }, [searchTerm]);
+        React.useEffect(() => {
+            localStorage.setItem(key, value);
+        }, [value, key]);
+
+        return [value, setValue];
+    };
+
+    const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
     const handleSearch = event => {
         setSearchTerm(event.target.value);
@@ -44,18 +50,6 @@ const App = () => {
 
             <Search onSearch={handleSearch} search={searchTerm}></Search>
 
-            {/*
-            if need seachTerm in Search component
-            <Search onSearch={handleSearch} searchTerm={searchTerm}></Search>
-*/}
-
-            {/*
-            if need seachTerm in App component
-            <p>
-                Searching for {searchTerm}
-            </p>
-*/}
-
             <hr/>
 
             <List list={searchStories}/>
@@ -69,13 +63,6 @@ const Search = ({search, onSearch}) => {
         <div>
             <label htmlFor="search">Search</label>
             <input id="search" type="text" value={search} onChange={onSearch}/>
-
-            {/*
-            if need seachTerm in Search component
-            <p>
-                Searching for <strong>{props.searchTerm}</strong>
-            </p>
-*/}
         </div>
     );
 
