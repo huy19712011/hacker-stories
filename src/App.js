@@ -25,8 +25,7 @@ const App = () => {
 
     const getAsyncStories = () =>
         new Promise(resolve => setTimeout(
-            () => resolve({data: {stories: initialStories}}),
-            2000)
+            () => resolve({data: {stories: initialStories}}), 2000)
         );
 
     // custom hook
@@ -43,12 +42,18 @@ const App = () => {
     const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
     const [stories, setStories] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [isError, setIsError] = React.useState(false);
 
     React.useEffect(() => {
+        setIsLoading(true);
+
         getAsyncStories().then(result => {
             setStories(result.data.stories);
-        });
-    });
+            setIsLoading(false);
+        })
+            .catch(() => setIsError(true));
+    }, []);
 
     const handleRemoveStory = item => {
         const newStories = stories.filter(story => item.objectId !== story.objectId);
@@ -78,7 +83,15 @@ const App = () => {
 
             <hr/>
 
-            <List list={searchStories} onRemoveItem={handleRemoveStory}/>
+            {isError && <p>Something went wrong ...</p>}
+            {isLoading ? (<p>Loading ...</p>) : (
+                <List
+                    list={searchStories}
+                    onRemoveItem={handleRemoveStory}
+                />
+            )}
+
+            {/*<List list={searchStories} onRemoveItem={handleRemoveStory}/>*/}
         </div>
     );
 };
