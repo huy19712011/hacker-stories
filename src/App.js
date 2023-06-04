@@ -64,20 +64,34 @@ const App = () => {
     );
 };
 
-const InputWithLabel = ({id, value, type='text', onInputChange, isFocused, children}) => (
-    <>
-        <label htmlFor={id}>{children}</label>
-        &nbsp;
-        <input
-            id={id}
-            type={type}
-            value={value}
-            autoFocus={isFocused}
-            onChange={onInputChange}
-        />
-    </>
-);
+const InputWithLabel = ({id, value, type='text', onInputChange, isFocused, children}) => {
 
+    // A. creating ref
+    const inputRef = React.useRef(null);
+
+    // C.
+    React.useEffect(() => {
+        if (isFocused && inputRef.current) {
+            // D.
+            inputRef.current.focus();
+        }
+    }, [isFocused]);
+
+    return (
+        <>
+            <label htmlFor={id}>{children}</label>
+            &nbsp;
+            {/*B*/}
+            <input
+                ref={inputRef}
+                id={id}
+                type={type}
+                value={value}
+                onChange={onInputChange}
+            />
+        </>
+    );
+};
 const Search = ({search, onSearch}) => {
 
     return (
@@ -108,11 +122,14 @@ const Item = ({title, url, author, num_comments, points}) => (
 export default App;
 
 /*
-Consider the concept of the callback handler: We pass a function from one component (App) to
-another component (Search); we call it in the second component (Search); but have the actual
-implementation of the function call in the first component (App). This way, we can communicate up
-the component tree. A handler function used in one component becomes a callback handler, which
-is passed down to components via React props. React props are always passed down as information
-the component tree, and callback handlers passed as functions in props can be used to communicate
-up the component hierarchy.
+• (A) First, create a ref with React’s useRef hook. This ref object is a persistent value which
+stays intact over the lifetime of a React component. It comes with a property called current,
+which, in contrast to the ref object, can be changed.
+• (B) Second, the ref is passed to the input field’s JSX-reserved ref attribute and the element
+instance is assigned to the changeable current property.
+• (C) Third, opt into React’s lifecycle with React’s useEffect Hook, performing the focus on the
+input field when the component renders (or its dependencies change).
+• (D) And fourth, since the ref is passed to the input field’s ref attribute, its current property
+gives access to the element. Execute its focus programmatically as a side-effect, but only if
+isFocused is set and the current property is existent.
 */
