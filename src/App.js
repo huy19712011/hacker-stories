@@ -4,7 +4,7 @@ import './App.css';
 
 const App = () => {
 
-    const stories = [
+    const initialStories = [
         {
             title: 'React',
             url: 'https://reactjs.org',
@@ -36,6 +36,14 @@ const App = () => {
 
     const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
+    const [stories, setStories] = React.useState(initialStories);
+
+    const handleRemoveStory = item => {
+        const newStories = stories.filter(story => item.objectId !== story.objectId);
+
+        setStories(newStories);
+    };
+
     const handleSearch = event => {
         setSearchTerm(event.target.value);
     };
@@ -58,12 +66,12 @@ const App = () => {
 
             <hr/>
 
-            <List list={searchStories}/>
+            <List list={searchStories} onRemoveItem={handleRemoveStory}/>
         </div>
     );
 };
 
-const InputWithLabel = ({id, value, type='text', onInputChange, isFocused, children}) => {
+const InputWithLabel = ({id, value, type = 'text', onInputChange, isFocused, children}) => {
 
     // A. creating ref
     const inputRef = React.useRef(null);
@@ -91,33 +99,37 @@ const InputWithLabel = ({id, value, type='text', onInputChange, isFocused, child
         </>
     );
 };
-const List = ({list}) =>
-    list.map(({objectId, ...item}) => <Item key={objectId} {...item}/>);
 
-// Using nested destructuring
-const Item = ({title, url, author, num_comments, points}) => (
-    <div>
+const List = ({list, onRemoveItem}) =>
+    list.map((item) => (
+        <Item
+            key={item.objectId}
+            item={item}
+            onRemoveItem={onRemoveItem}
+        />
+    ));
+
+const Item = ({item, onRemoveItem}) => {
+    const handleRemoveItem = () => {
+        onRemoveItem(item);
+    };
+
+    return (
+        <div>
         <span>
-            <a href={url}>{title}</a>
+            <a href={item.url}>{item.title}</a>
         </span>
-        <span>{author}</span>
-        <span>{num_comments}</span>
-        <span>{points}</span>
-    </div>
-);
-
+            <span>{item.author}</span>
+            <span>{item.num_comments}</span>
+            <span>{item.points}</span>
+            <span>
+                <button type="button" onClick={handleRemoveItem}>
+                    Dismiss
+                </button>
+            </span>
+        </div>
+    );
+};
 
 export default App;
 
-/*
-• (A) First, create a ref with React’s useRef hook. This ref object is a persistent value which
-stays intact over the lifetime of a React component. It comes with a property called current,
-which, in contrast to the ref object, can be changed.
-• (B) Second, the ref is passed to the input field’s JSX-reserved ref attribute and the element
-instance is assigned to the changeable current property.
-• (C) Third, opt into React’s lifecycle with React’s useEffect Hook, performing the focus on the
-input field when the component renders (or its dependencies change).
-• (D) And fourth, since the ref is passed to the input field’s ref attribute, its current property
-gives access to the element. Execute its focus programmatically as a side-effect, but only if
-isFocused is set and the current property is existent.
-*/
