@@ -60,37 +60,26 @@ const App = () => {
     );
 
 
-    /*
-    Move all the data fetching logic into a standalone function outside
-    the side-effect (A); wrap it into a useCallback hook (B); and then invoke it in the useEffect hook
-    (C). Let’s explore why React’s useCallback Hook is needed here. This hook creates a memoized function
-    every time its dependency array (E) changes. As a result, the useEffect hook runs again (C) because
-    it depends on the new function (D)
-        1. change: searchTerm
-        2. implicit change: handleFetchStories
-        3. run: side-effect
-    */
-
-    // A
-    const handleFetchStories = React.useCallback(() => {
-        // if (!searchTerm) return;
+    const handleFetchStories = React.useCallback(async () => {
 
         dispatchStories({type: 'STORIES_FETCH_INIT'});
 
-        axios
-            .get(url)
-            .then(result => {
-                dispatchStories({
-                    type: 'STORIES_FETCH_SUCCESS',
-                    payload: result.data["hits"],
-                });
-            })
-            .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
-    }, [url]); // E
+        try {
+            const result = await axios.get(url);
+
+            dispatchStories({
+                type: 'STORIES_FETCH_SUCCESS',
+                payload: result.data["hits"],
+            });
+        } catch {
+            dispatchStories({type: 'STORIES_FETCH_FAILURE'});
+        }
+
+    }, [url]);
 
     React.useEffect(() => {
-        handleFetchStories(); // C
-    }, [handleFetchStories]); // D
+        handleFetchStories();
+    }, [handleFetchStories]);
 
     const handleRemoveStory = item => {
         dispatchStories({
