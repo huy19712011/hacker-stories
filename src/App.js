@@ -57,7 +57,19 @@ const App = () => {
 
     const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
-    React.useEffect(() => {
+    /*
+    Move all the data fetching logic into a standalone function outside
+    the side-effect (A); wrap it into a useCallback hook (B); and then invoke it in the useEffect hook
+    (C). Let’s explore why React’s useCallback Hook is needed here. This hook creates a memoized function
+    every time its dependency array (E) changes. As a result, the useEffect hook runs again (C) because
+    it depends on the new function (D)
+        1. change: searchTerm
+        2. implicit change: handleFetchStories
+        3. run: side-effect
+    */
+
+    // A
+    const handleFetchStories = React.useCallback(() => {
         if (!searchTerm) return;
 
         dispatchStories({type: 'STORIES_FETCH_INIT'});
@@ -71,7 +83,11 @@ const App = () => {
                 });
             })
             .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
-    }, [searchTerm]);
+    }, [searchTerm]); // E
+
+    React.useEffect(() => {
+        handleFetchStories(); // C
+    }, [handleFetchStories]); // D
 
     const handleRemoveStory = item => {
         dispatchStories({
