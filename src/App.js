@@ -38,7 +38,7 @@ const storiesReducer = (state, action) => {
             return {
                 ...state,
                 data: state.data.filter(
-                    story => action.payload.objectID !== story.objectID
+                    story => action.payload["objectID"] !== story["objectID"]
                 ),
             };
         default:
@@ -58,18 +58,20 @@ const App = () => {
     const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
     React.useEffect(() => {
+        if (!searchTerm) return;
+
         dispatchStories({type: 'STORIES_FETCH_INIT'});
 
-        fetch(`${API_ENDPOINT}re`)
+        fetch(`${API_ENDPOINT}${searchTerm}`)
             .then(response => response.json())
             .then(result => {
                 dispatchStories({
                     type: 'STORIES_FETCH_SUCCESS',
-                    payload: result.hits,
+                    payload: result["hits"],
                 });
             })
             .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
-    }, []);
+    }, [searchTerm]);
 
     const handleRemoveStory = item => {
         dispatchStories({
@@ -81,9 +83,6 @@ const App = () => {
     const handleSearch = event => {
         setSearchTerm(event.target.value);
     };
-
-    const searchStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
-
 
     return (
         <div>
@@ -103,7 +102,7 @@ const App = () => {
             {stories.isAppError && <p>Something went wrong ...</p>}
             {stories.isLoading ? (<p>Loading ...</p>) : (
                 <List
-                    list={searchStories}
+                    list={stories.data}
                     onRemoveItem={handleRemoveStory}
                 />
             )}
@@ -144,7 +143,7 @@ const InputWithLabel = ({id, value, type = 'text', onInputChange, isFocused, chi
 const List = ({list, onRemoveItem}) =>
     list.map((item) => (
         <Item
-            key={item.objectID}
+            key={item["objectID"]}
             item={item}
             onRemoveItem={onRemoveItem}
         />
@@ -156,7 +155,7 @@ const Item = ({item, onRemoveItem}) => (
             <a href={item.url}>{item.title}</a>
         </span>
         <span>{item.author}</span>
-        <span>{item.num_comments}</span>
+        <span>{item["num_comments"]}</span>
         <span>{item.points}</span>
         <span>
                 <button type="button" onClick={() => onRemoveItem(item)}>
