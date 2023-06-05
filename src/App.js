@@ -3,12 +3,13 @@ import React from "react";
 import './App.css';
 
 const storiesReducer = (state, action) => {
-    if (action.type === 'SET_STORIES') {
-        return action.payload;
-    } else if (action.type === 'REMOVE_STORIES') {
-        return state.filter(story => action.payload.objectId !== story.objectId);
-    } else {
-        throw new Error();
+    switch (action.type) {
+        case 'SET_STORIES':
+            return action.payload;
+        case 'REMOVE_STORIES':
+            return state.filter(story => action.payload.objectId !== story.objectId);
+        default:
+            throw new Error();
     }
 };
 
@@ -71,8 +72,6 @@ const App = () => {
     }, []);
 
     const handleRemoveStory = item => {
-        // const newStories = stories.filter(story => item.objectId !== story.objectId);
-
         dispatchStories({
             type: 'REMOVE_STORIES',
             payload: item,
