@@ -83,14 +83,17 @@ const App = () => {
         {data: [], isLoading: false, isAppError: false}
     );
 
+    const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
     React.useEffect(() => {
         dispatchStories({type: 'STORIES_FETCH_INIT'});
 
-        getAsyncStories()
+        fetch(`${API_ENDPOINT}re`)
+            .then(response => response.json())
             .then(result => {
                 dispatchStories({
                     type: 'STORIES_FETCH_SUCCESS',
-                    payload: result.data.stories,
+                    payload: result.hits,
                 });
             })
             .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
