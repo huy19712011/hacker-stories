@@ -2,6 +2,17 @@ import React from "react";
 
 import './App.css';
 
+// custom hook
+const useSemiPersistentState = (key, initialState) => {
+    const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
+
+    React.useEffect(() => {
+        localStorage.setItem(key, value);
+    }, [value, key]);
+
+    return [value, setValue];
+};
+
 const storiesReducer = (state, action) => {
     switch (action.type) {
         case 'STORIES_FETCH_INIT':
@@ -27,7 +38,7 @@ const storiesReducer = (state, action) => {
             return {
                 ...state,
                 data: state.data.filter(
-                    story => action.payload.objectId !== story.objectId
+                    story => action.payload.objectID !== story.objectID
                 ),
             };
         default:
@@ -36,17 +47,6 @@ const storiesReducer = (state, action) => {
 };
 
 const App = () => {
-
-    // custom hook
-    const useSemiPersistentState = (key, initialState) => {
-        const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
-
-        React.useEffect(() => {
-            localStorage.setItem(key, value);
-        }, [value, key]);
-
-        return [value, setValue];
-    };
 
     const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
@@ -144,7 +144,7 @@ const InputWithLabel = ({id, value, type = 'text', onInputChange, isFocused, chi
 const List = ({list, onRemoveItem}) =>
     list.map((item) => (
         <Item
-            key={item.objectId}
+            key={item.objectID}
             item={item}
             onRemoveItem={onRemoveItem}
         />
