@@ -47,15 +47,17 @@ const storiesReducer = (state, action) => {
 };
 
 const App = () => {
+    const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
     const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
+
+    const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
 
     const [stories, dispatchStories] = React.useReducer(
         storiesReducer,
         {data: [], isLoading: false, isAppError: false}
     );
 
-    const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
     /*
     Move all the data fetching logic into a standalone function outside
@@ -70,11 +72,11 @@ const App = () => {
 
     // A
     const handleFetchStories = React.useCallback(() => {
-        if (!searchTerm) return;
+        // if (!searchTerm) return;
 
         dispatchStories({type: 'STORIES_FETCH_INIT'});
 
-        fetch(`${API_ENDPOINT}${searchTerm}`)
+        fetch(url)
             .then(response => response.json())
             .then(result => {
                 dispatchStories({
@@ -83,7 +85,7 @@ const App = () => {
                 });
             })
             .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
-    }, [searchTerm]); // E
+    }, [url]); // E
 
     React.useEffect(() => {
         handleFetchStories(); // C
@@ -96,8 +98,12 @@ const App = () => {
         });
     };
 
-    const handleSearch = event => {
+    const handleSearchInput = event => {
         setSearchTerm(event.target.value);
+    };
+
+    const handleSearchSubmit = () => {
+        setUrl(`${API_ENDPOINT}${searchTerm}`);
     };
 
     return (
@@ -108,10 +114,18 @@ const App = () => {
                 id="search"
                 value={searchTerm}
                 isFocused
-                onInputChange={handleSearch}
+                onInputChange={handleSearchInput}
             >
                 <strong>Search:</strong>
             </InputWithLabel>
+
+            <button
+                type="button"
+                disabled={!searchTerm}
+                onClick={handleSearchSubmit}
+            >
+                Submit
+            </button>
 
             <hr/>
 
