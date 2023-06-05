@@ -4,10 +4,32 @@ import './App.css';
 
 const storiesReducer = (state, action) => {
     switch (action.type) {
-        case 'SET_STORIES':
-            return action.payload;
-        case 'REMOVE_STORIES':
-            return state.filter(story => action.payload.objectId !== story.objectId);
+        case 'STORIES_FETCH_INIT':
+            return {
+                ...state,
+                isLoading: true,
+                isAppError: false,
+            };
+        case 'STORIES_FETCH_SUCCESS':
+            return {
+                ...state,
+                isLoading: false,
+                isAppError: false,
+                data: action.payload,
+            };
+        case 'STORIES_FETCH_FAILURE':
+            return {
+                ...state,
+                isLoading: false,
+                isAppError: true,
+            };
+        case 'REMOVE_STORY':
+            return {
+                ...state,
+                data: state.data.filter(
+                    story => action.payload.objectId !== story.objectId
+                ),
+            };
         default:
             throw new Error();
     }
@@ -39,6 +61,10 @@ const App = () => {
             () => resolve({data: {stories: initialStories}}), 2000)
         );
 
+    // only for test with reject
+    // const getAsyncStories2 = () =>
+    //     new Promise((resolve, reject) => setTimeout(reject, 2000));
+
     // custom hook
     const useSemiPersistentState = (key, initialState) => {
         const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
@@ -52,23 +78,22 @@ const App = () => {
 
     const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
-    // const [stories, setStories] = React.useState([]);
-    const [stories, dispatchStories] = React.useReducer(storiesReducer, []);
-
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [isError, setIsError] = React.useState(false);
+    const [stories, dispatchStories] = React.useReducer(
+        storiesReducer,
+        {data: [], isLoading: false, isAppError: false}
+    );
 
     React.useEffect(() => {
-        setIsLoading(true);
+        dispatchStories({type: 'STORIES_FETCH_INIT'});
 
-        getAsyncStories().then(result => {
-            dispatchStories({
-                type: 'SET_STORIES',
-                payload: result.data.stories,
-            });
-            setIsLoading(false);
-        })
-            .catch(() => setIsError(true));
+        getAsyncStories()
+            .then(result => {
+                dispatchStories({
+                    type: 'STORIES_FETCH_SUCCESS',
+                    payload: result.data.stories,
+                });
+            })
+            .catch(() => dispatchStories({type: 'STORIES_FETCH_FAILURE'}));
     }, []);
 
     const handleRemoveStory = item => {
@@ -82,7 +107,7 @@ const App = () => {
         setSearchTerm(event.target.value);
     };
 
-    const searchStories = stories.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    const searchStories = stories.data.filter(story => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
 
     return (
@@ -100,15 +125,14 @@ const App = () => {
 
             <hr/>
 
-            {isError && <p>Something went wrong ...</p>}
-            {isLoading ? (<p>Loading ...</p>) : (
+            {stories.isAppError && <p>Something went wrong ...</p>}
+            {stories.isLoading ? (<p>Loading ...</p>) : (
                 <List
                     list={searchStories}
                     onRemoveItem={handleRemoveStory}
                 />
             )}
 
-            {/*<List list={searchStories} onRemoveItem={handleRemoveStory}/>*/}
         </div>
     );
 };
